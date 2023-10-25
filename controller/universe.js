@@ -1,10 +1,4 @@
 const Universe = require('../models/universe');
-const sql = require("mysql2");
-
-exports.getUniverses = async (req, res) => {
-    const universes = await Universe.findAll();
-    return res.status(200).json(universes);
-}
 
 exports.createUniverse = async (req, res) => {
     // Create description thanks to OpenAI

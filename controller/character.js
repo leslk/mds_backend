@@ -1,46 +1,53 @@
 const Character = require('../models/character.js');
-const connection = require('../config/database.js').databaseConnection;
 
-exports.getCharacters = (req, res) => {
-    connection.query('SELECT * FROM characters', (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+exports.getCharacters = async (req, res) => {
+    try {
+        const characters = Character.findOne(req.params.id)
+        return res.status(200).json(characters);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.createCharacter = (req, res) => {
-    connection.query(`INSERT INTO characters (id_univers, name, imageUrl, description) VALUES (${req.body.id_univers}, '${req.body.name}', '${req.body.imageUrl}', '${req.body.description}')`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+    // Create description thanks to OpenAI
+    // get image from stable
+    try {
+        const character = new Character(null, req.body.name, description, imageUrl);
+        character.save();
+        return res.status(201).json({ message: 'Character created' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.updateCharacter = (req, res) => {
-    console.log(req);
+    try {
+        let character = new Character(req.params.id, req.body.name, req.body.creatorId, req.body.description, req.body.imageUrl);
+        character.save();
+        return res.status(200).json({ message: 'Universe updated' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.deleteCharacter = (req, res) => {
-    connection.query(`DELETE FROM characters WHERE id = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        Character.delete(req.params.id);
+        return res.status(200).json({ message: 'Universe deleted' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.getCharacter = (req, res) => {
-    connection.query(`SELECT * FROM character c LEFT JOIN protagonist p ON p.id_univers = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
+    try {
+        const character = Character.findOne(req.params.id);
+        if (character === null) {
+            return res.status(404).json({ error: 'Universe not found' });
         }
-    });
+        return res.status(200).json(character);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }

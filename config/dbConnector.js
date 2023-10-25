@@ -57,6 +57,7 @@ class DbConnector {
         }
         return obj[0][0];
     }
+    
     async loadObjects(className) {
         const sql = `SELECT * FROM ${className}`;
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
