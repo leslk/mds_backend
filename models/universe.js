@@ -1,4 +1,5 @@
 const DbConnector = require("../config/dbConnector");
+const { fromMap } = require("./user");
 
 
 class Universe {
@@ -34,16 +35,28 @@ class Universe {
         }
     }
 
+    fromMap (map) {
+        let universe = new Universe(map.id, map.name, map.creatorId, map.description, map.imageUrl);
+        return universe;
+    }
+
     async save() {
         return await DbConnector.saveObject(this);
     }
 
     static async findOne(id) {
-        return await DbConnector.loadObject("universe", id);
+        const universe = await DbConnector.loadObject("universe", id);
+        const data = Universe.fromMap(universe);
+        return data;
     }
 
     static async findAll() {
-        return await DbConnector.loadObjects("universe");
+        const universes = await DbConnector.loadObjects("universe");
+        const data = [];
+        universes.forEach(universe => {
+            data.push(Universe.fromMap(universe));
+        });
+        return data;
     }
 
     static async delete(id) {
