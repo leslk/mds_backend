@@ -3,10 +3,28 @@ class Talk {
         this.backgroundImage = backgroundImage;
         this.historique = historique;
     }
-    getAllTalks() {
 
+    toMap() {
+        return {
+            id: this.id,
+            backgroundImage: this.backgroundImage,
+            historique: this.historique
+        }
     }
-    createTalks() {
+    
+    async save() {
+        return await DbConnector.saveObject(this);
+    }
 
+    static async findOne(id) {
+        return await DbConnector.loadObject("talk", id);
+    }
+
+    static async findAll() {
+        return await DbConnector.loadObjects("talk");
+    }
+
+    static async delete(id) {
+        return DbConnector.deleteObject("talk", id);
     }
 }

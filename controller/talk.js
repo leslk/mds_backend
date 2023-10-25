@@ -4,13 +4,12 @@ const connection = require('../config/database').databaseConnection;
 
 
 exports.getTalks = (req, res) => {
-    connection.query('SELECT * FROM talks', (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        const talks = Talk.findAll();
+        return res.status(200).json(talks);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.createTalk = (req, res) => {
@@ -23,26 +22,23 @@ exports.createTalk = (req, res) => {
     });
 }
 
-exports.updateTalk = (req, res) => {
-    console.log(req.headers);
-}
-
 exports.deleteTalk = (req, res) => {
-    connection.query(`DELETE FROM talks WHERE id = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        Talk.delete(req.params.id);
+        return res.status(200).json({ message: 'Talk deleted' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.getTalk = (req, res) => {
-    connection.query(`SELECT * FROM talks WHERE id = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
+   try {
+        const talk = Talk.findOne(req.params.id);
+        if (talk === null) {
+            return res.status(404).json({ error: 'Talk not found' });
         }
-    });
+        return res.status(200).json(talk);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }

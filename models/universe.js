@@ -23,6 +23,17 @@ class Universe {
         this.imageUrl = imageUrl;
     }
 
+    toMap() {
+        return {
+            id: this.id,
+            name: this.name,
+            creatorId: this.creatorId,
+            description: this.description,
+            imageUrl: this.imageUrl,
+            characters: this.characters
+        }
+    }
+
     async save() {
         return await DbConnector.saveObject(this);
     }
@@ -35,8 +46,8 @@ class Universe {
         return await DbConnector.loadObjects("universe");
     }
 
-    static async delete() {
-        return DbConnector.deleteObject(this);
+    static async delete(id) {
+        return DbConnector.deleteObject("universe", id);
     }
 }
 

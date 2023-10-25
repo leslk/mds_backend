@@ -34,8 +34,8 @@ class DbConnector {
         return obj[0];
     }
 
-    async deleteObject(object) {
-        const sql = `DELETE FROM ${object.constructor.name} WHERE id = ${object.id}`;
+    async deleteObject(className, id) {
+        const sql = `DELETE FROM ${className} WHERE id = ${id}`;
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
         return obj[0];
     }
@@ -57,7 +57,7 @@ class DbConnector {
         }
         return obj[0][0];
     }
-    
+
     async loadObjects(className) {
         const sql = `SELECT * FROM ${className}`;
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});

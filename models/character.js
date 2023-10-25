@@ -7,6 +7,25 @@ class Character {
         this.imageUrl = imageUrl;
         this.discussions = [];
     }
+
+    setDescription(description) {
+        this.description = description;
+    }
+
+    setImageUrl(imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    toMap() {
+        return {
+            id: this.id,
+            name: this.name,
+            description: this.description,
+            imageUrl: this.imageUrl,
+            discussions: this.discussions
+        }
+    }
+
     async save() {
         return await DbConnector.saveObject(this);
     }
@@ -19,8 +38,8 @@ class Character {
         return await DbConnector.loadObjects("character");
     }
 
-    static async delete() {
-        return DbConnector.deleteObject(this);
+    static async delete(id) {
+        return DbConnector.deleteObject("character", id);
     }
 }
 
