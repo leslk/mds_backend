@@ -22,14 +22,30 @@ class User {
         }
     }
 
+    static fromMap(map){
+       let user = new User(map.id, map.pseudo, map.email, map.password);
+        return user;
+    }
+
     static async findOne(id) {
-        return await DbConnector.loadObject("user", id);
+        const user = await DbConnector.loadObject("user", id);
+        const data = User.fromMap(user);
+        return data;
     }
+
     static async findOneByEmail(email) {
-        return await DbConnector.loadUserByEmail("user", email);
+        const user = await DbConnector.loadUserByEmail("user", email);
+        const data = User.fromMap(user);
+        return data;
     }
+    
     static async findAll() {
-        return await DbConnector.loadObjects("user");
+        const users = await DbConnector.loadObjects("user");
+        const data = [];
+        users.forEach(user => {
+            data.push(User.fromMap(user));
+        });
+        return data;
     }
 }
 

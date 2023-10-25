@@ -34,13 +34,17 @@ exports.checkAuth = async (req, res) => {
     }
     let token;
     try {
-        token = await createToken({email: req.body.email});
+        token = await createToken({id: user.id, pseudo: user.pseudo, email: user.email});
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
 
     return res.status(200).json({
-        userId: user.id,
+        user: {
+            id: user.id,
+            pseudo: user.pseudo,
+            email: user.email
+        },
         token: token
     });
 }
