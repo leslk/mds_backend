@@ -26,15 +26,28 @@ class Character {
         }
     }
 
+    fromMap(map) {
+        let character = new Character(map.id, map.name, map.description, map.imageUrl);
+        return character;
+    }
+
     async save() {
         return await DbConnector.saveObject(this);
     }
 
     static async findOne(id) {
-        return await DbConnector.loadObject("character", id);
+        const character = await DbConnector.loadObject("character", id);
+        const data = Character.fromMap(character);
+        return data;
     }
 
     static async findAll() {
+        const characters = await DbConnector.loadObjects("character");
+        const data = [];
+        characters.forEach(character => {
+            data.push(Character.fromMap(character));
+        });
+        return data;
         return await DbConnector.loadObjects("character");
     }
 
