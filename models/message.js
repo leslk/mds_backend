@@ -17,6 +17,8 @@ class Message {
     }
 
     static async findOne(id) {
-        return await DbConnector.loadObject("message", id);
+        const message = await DbConnector.loadObject("message", id);
+        const data = Message.fromMap(message);
+        return data;
     }
 }
