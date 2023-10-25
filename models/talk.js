@@ -1,3 +1,5 @@
+const { fromMap } = require("./user");
+
 class Talk {
     constructor(backgroundImage, historique) {
         this.backgroundImage = backgroundImage;
@@ -11,17 +13,29 @@ class Talk {
             historique: this.historique
         }
     }
+
+    fromMap(map) {
+        let talk = new Talk(map.id, map.backgroundImage, map.historique);
+        return talk;
+    }
     
     async save() {
         return await DbConnector.saveObject(this);
     }
 
     static async findOne(id) {
-        return await DbConnector.loadObject("talk", id);
+        const talk = await DbConnector.loadObject("talk", id);
+        const data = Talk.fromMap(talk);
+        return data;
     }
 
     static async findAll() {
-        return await DbConnector.loadObjects("talk");
+        const talks = await DbConnector.loadObjects("talk");
+        const data = [];
+        talks.forEach(talk => {
+            data.push(Talk.fromMap(talk));
+        });
+        return data;
     }
 
     static async delete(id) {
