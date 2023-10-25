@@ -1,13 +1,14 @@
 const DbConnector = require("../config/dbConnector");
 
 
-export default class Universe {
-    constructor(name, creatorId, description, imageUrl, characters) {
+class Universe {
+    constructor(id, name, creatorId, description, imageUrl) {
+        this.id = id;
         this.name = name;
         this.creatorId = creatorId;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.characters = characters;
+        this.characters = [];
     }
 
     static toMap(map) {
@@ -34,7 +35,9 @@ export default class Universe {
         return await DbConnector.loadObjects("universe");
     }
 
-    async delete() {
+    static async delete() {
         return DbConnector.deleteObject(this);
     }
 }
+
+module.exports = Universe;

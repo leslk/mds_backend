@@ -57,14 +57,22 @@ exports.updateUser= async (req, res) => {
 }
 
 exports.getUser = async (req, res) => {
-    const user = await User.findOne(req.params.id);
-    if (user === null) {
-        return res.status(404).json({ error: 'User not found' });
+    try {
+        const user = await User.findOne(req.params.id);
+        if (user === null) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        return res.status(200).json(user);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
-    return res.status(200).json(user);
 }
 
 exports.getUsers = async (req, res) => {
-    const users = await User.findAll();
-    return res.status(200).json(users);
+    try {
+        const users = await User.findAll();
+        return res.status(200).json(users);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }

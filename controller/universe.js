@@ -1,4 +1,4 @@
-const Universe = require('../models/character.js');
+const Universe = require('../models/universe');
 const sql = require("mysql2");
 
 exports.getUniverses = async (req, res) => {
@@ -6,47 +6,56 @@ exports.getUniverses = async (req, res) => {
     return res.status(200).json(universes);
 }
 
-exports.createUniverse = (req, res) => {
-    let {name, creatorId} = req.body;
-    // generate description with name and store in variable
-    // generate prompt to get image from Stable
-    
+exports.createUniverse = async (req, res) => {
+    // Create description thanks to OpenAI
+    // get image from stable
+    try {
+        let universe = new Universe(null, req.body.name, req.body.creatorId, description, imageUrl);
+        await universe.save();
 
-    let universe = new Universe(name, creatorId);
-    // OPenAI => description;
-    universe.addToDatabase();
+        return res.status(201).json({ message: 'Universe created' });
 
-
-    // connection.query(`INSERT INTO universes (name, imageUrl, description) VALUES ('${req.body.name}, ${req.body.imageUrl}, ${req.body.description}')`, (err, result) => {
-    //     if (err) {
-    //         console.log(err);
-    //     } else {
-    //         res.json(result);
-    //     }
-    // });
-    console.log(req);
+    } catch(err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.updateUniverse = (req, res) => {
-    console.log(req);
+    try {
+        let universe = new Universe(req.params.id, req.body.name, req.body.creatorId, req.body.description, req.body.imageUrl);
+        universe.save();
+        return res.status(200).json({ message: 'Universe updated' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 exports.deleteUniverse = (req, res) => {
-    connection.query(`DELETE FROM universes WHERE id = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        Universe.delete(req.params.id);
+        return res.status(200).json({ message: 'Universe deleted' });
+    } catch(err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
-exports.getUniverse = (req, res) => {
-    connextion.query(`SELECT * FROM universes WHERE id = ${req.params.id}`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(result);
+exports.getUniverses = async (req, res) => {
+    try {
+        const universes = Universe.findAll();
+        return res.status(200).json(universes);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+exports.getUniverse = async (req, res) => {
+    try {
+        const universe = Universe.findOne(req.params.id);
+        if (universe === null) {
+            return res.status(404).json({ error: 'Universe not found' });
         }
-    });
+        return res.status(200).json(universe);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }

@@ -6,6 +6,7 @@ class User {
         this.pseudo = pseudo;
         this.email = email;
         this.password = password;
+        this.universes = [];
     }
 
     async save() {
