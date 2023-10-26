@@ -3,7 +3,7 @@ require("dotenv").config({path : "./config/.env"});
 const sql = require("mysql2/promise");
 
 
-const characterRoutes = require("./routes/character");
+const protagonistRoutes = require("./routes/protagonist");
 const universeRoutes = require("./routes/universe");
 const messageRoutes = require("./routes/message");
 const userRoutes = require("./routes/user");
@@ -24,7 +24,7 @@ app.use(express.json());
 // });
 
 app.use("/api/universes", universeRoutes);
-app.use("/api/universes", characterRoutes);
+app.use("/api/universes", protagonistRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/talks", messageRoutes);
 app.use("/api/talks", talkRoutes);

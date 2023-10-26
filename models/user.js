@@ -6,7 +6,6 @@ class User {
         this.pseudo = pseudo;
         this.email = email;
         this.password = password;
-        this.universes = [];
     }
 
     async save() {
@@ -28,7 +27,11 @@ class User {
     }
 
     static async findOne(id) {
+        console.log(id);
         const user = await DbConnector.loadObject("user", id);
+        if (!user) {
+            return user;
+        }
         const data = User.fromMap(user);
         return data;
     }
@@ -38,7 +41,7 @@ class User {
         const data = User.fromMap(user);
         return data;
     }
-    
+
     static async findAll() {
         const users = await DbConnector.loadObjects("user");
         const data = [];

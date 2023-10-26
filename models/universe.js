@@ -1,22 +1,33 @@
 const DbConnector = require("../config/dbConnector");
-const { fromMap } = require("./user");
+const OpenAi = require("../models/openAi");
+const StableImage = require("../models/stableImage");
 
 
 class Universe {
-    constructor(id, name, creatorId, description, imageUrl) {
+    constructor(id, name, id_user, description, imageUrl) {
         this.id = id;
         this.name = name;
-        this.creatorId = creatorId;
+        this.id_user = id_user;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.characters = [];
     }
 
-    static toMap(map) {
-        return new Universe(map.name, map.creatorId, map.description, map.imageUrl, map.characters);
+    async generateDescription() {
+        const description = await OpenAi.generateUniverseDescription(this.name);
+        this.setDescription(description)
+    }
+
+    async generateStablePrompt() {
+        await OpenAi.generateStableUniversePrompt(this.name);
+    }
+
+    async generateImage(prompt) {
+        const imageUrl =  await StableImage.generateImage(prompt, this.name, this.constructor.name);
+        this.setImageUrl(imageUrl);
     }
 
     setDescription(description) {
+        description.replace("\n", "");
         this.description = description;
     }
 
@@ -28,15 +39,14 @@ class Universe {
         return {
             id: this.id,
             name: this.name,
-            creatorId: this.creatorId,
+            id_user: this.id_user,
             description: this.description,
             imageUrl: this.imageUrl,
-            characters: this.characters
         }
     }
 
-    fromMap (map) {
-        let universe = new Universe(map.id, map.name, map.creatorId, map.description, map.imageUrl);
+    static fromMap (map) {
+        let universe = new Universe(map.id, map.name, map.id_user, map.description, map.imageUrl);
         return universe;
     }
 
@@ -46,21 +56,25 @@ class Universe {
 
     static async findOne(id) {
         const universe = await DbConnector.loadObject("universe", id);
+        if (!universe) {
+            return universe;
+        }
         const data = Universe.fromMap(universe);
         return data;
     }
 
-    static async findAll() {
-        const universes = await DbConnector.loadObjects("universe");
+    static async findAll(id_user) {
+        const universes = await DbConnector.loadObjectsByUser("universe", id_user);
         const data = [];
         universes.forEach(universe => {
             data.push(Universe.fromMap(universe));
         });
+        console.log(data);
         return data;
     }
 
     static async delete(id) {
-        return DbConnector.deleteObject("universe", id);
+        return await DbConnector.deleteObject("universe", id);
     }
 }
 

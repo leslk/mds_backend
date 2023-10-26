@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const OpenAi = require('../models/openAi');
 const emailRegex = /^([a-zA-Z0-9\.-_]+)@([a-zA-Z0-9-_]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/;
 const {createToken} =  require('../utils/jwt');
 const bcrypt = require('bcrypt');

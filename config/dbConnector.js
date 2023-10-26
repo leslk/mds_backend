@@ -7,7 +7,7 @@ class DbConnector {
         if (object.id === null) {
             await this.insertObject(object);
         } else {
-            this.updateObject(object);
+            await this.updateObject(object);
         }
     }
 
@@ -19,13 +19,18 @@ class DbConnector {
             }
         });
         const keys = Object.keys(map);
-        const values = Object.values(map).map(value => `'${value}'`);
+        const values = Object.values(map).map(value => `"${value}"`);
         const sql = `INSERT INTO ${object.constructor.name} (${keys.join(', ')}) VALUES (${values.join(', ')})`;
-        return await this.connection.promise().query(sql).catch(err => {throw err;});
+        return await this.connection.promise().query(sql).catch(err => {throw new Error(`Error on inserting object ${object.constructor.name} into DB: ${err.message}`);});
     }
 
     async updateObject(object) {
         const map = object.toMap();
+        Object.keys(map).forEach(key => {
+            if (map[key] === undefined) {
+                delete map[key];
+            }
+        });
         const keys = Object.keys(map);
         const values = Object.values(map);
         const updateString = keys.map((key, index) => `${key} = '${values[index]}'`).join(', ');
@@ -36,8 +41,7 @@ class DbConnector {
 
     async deleteObject(className, id) {
         const sql = `DELETE FROM ${className} WHERE id = ${id}`;
-        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
-        return obj[0];
+        return await this.connection.promise().query(sql).catch(err => {throw err;});
     }
 
     async loadObject(className, id) {
@@ -60,6 +64,18 @@ class DbConnector {
 
     async loadObjects(className) {
         const sql = `SELECT * FROM ${className}`;
+        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
+        return obj[0];
+    }
+
+    async loadObjectsByUser(className, userId) {
+        const sql = `SELECT * FROM ${className} WHERE id_user = ${userId}`;
+        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
+        return obj[0];
+    }
+
+    async loadObjectsByUniverseAndUser(className, universeId, id_user) {
+        const sql = `SELECT * FROM ${className} WHERE id_universe = ${universeId} AND id_user = ${id_user}`;
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
         return obj[0];
     }
