@@ -27,7 +27,6 @@ class User {
     }
 
     static async findOne(id) {
-        console.log(id);
         const user = await DbConnector.loadObject("user", id);
         if (!user) {
             return user;
@@ -37,7 +36,7 @@ class User {
     }
 
     static async findOneByEmail(email) {
-        const user = await DbConnector.loadUserByEmail("user", email);
+        const user = await DbConnector.searchObject("user", {email: email});
         const data = User.fromMap(user);
         return data;
     }

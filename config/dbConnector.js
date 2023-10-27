@@ -2,12 +2,22 @@ class DbConnector {
     constructor() {
         this.connection = require('../config/database').databaseConnection;
     }
+
+    async searchObject(className, filter){
+        let suffixFilter = "";
+        for (let key in filter) {
+            suffixFilter += ` ${key} = '${filter[key]}' AND`;
+        }
+        const sql = `SELECT * FROM ${className} WHERE ` + suffixFilter.slice(0, -4);
+        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
+        return obj[0];
+    }
     
     async saveObject(object) {
         if (object.id === null) {
-            await this.insertObject(object);
+            return await this.insertObject(object);
         } else {
-            await this.updateObject(object);
+            return await this.updateObject(object);
         }
     }
 
@@ -21,7 +31,13 @@ class DbConnector {
         const keys = Object.keys(map);
         const values = Object.values(map).map(value => `"${value}"`);
         const sql = `INSERT INTO ${object.constructor.name} (${keys.join(', ')}) VALUES (${values.join(', ')})`;
-        return await this.connection.promise().query(sql).catch(err => {throw new Error(`Error on inserting object ${object.constructor.name} into DB: ${err.message}`);});
+        try {
+            map.id = (await this.connection.promise().query(sql))[0].insertId;
+        } catch(err) {
+            throw new Error(`Error on inserting object ${object.constructor.name} into DB: ${err.message}`);
+        }
+        return map;
+
     }
 
     async updateObject(object) {
@@ -36,7 +52,8 @@ class DbConnector {
         const updateString = keys.map((key, index) => `${key} = '${values[index]}'`).join(', ');
         const sql = `UPDATE ${object.constructor.name} SET ${updateString} WHERE id = ${object.id}`
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
-        return obj[0];
+        const updatedObject = await this.loadObject(object.constructor.name, object.id);
+        return updatedObject;
     }
 
     async deleteObject(className, id) {
@@ -53,29 +70,8 @@ class DbConnector {
         return obj[0][0];
     }
 
-    async loadUserByEmail(className, email) {
-        const sql = `SELECT * FROM ${className} WHERE email = '${email}'`;
-        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
-        if (obj[0].length === 0) {
-            return null;
-        }
-        return obj[0][0];
-    }
-
     async loadObjects(className) {
         const sql = `SELECT * FROM ${className}`;
-        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
-        return obj[0];
-    }
-
-    async loadObjectsByUser(className, userId) {
-        const sql = `SELECT * FROM ${className} WHERE id_user = ${userId}`;
-        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
-        return obj[0];
-    }
-
-    async loadObjectsByUniverseAndUser(className, universeId, id_user) {
-        const sql = `SELECT * FROM ${className} WHERE id_universe = ${universeId} AND id_user = ${id_user}`;
         const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
         return obj[0];
     }

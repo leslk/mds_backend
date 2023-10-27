@@ -5,9 +5,9 @@ class StoredImage {
         this.arrayBuffer = arrayBuffer;
     }
 
-    async storeImage(data, name, type) {
+    async storeImage(data, id, type) {
         const formattedType = type.toLowerCase();
-        const formattedName = `${name.split(" ").join("_")}.png`;
+        const formattedName = `${id}.png`;
         try {
             const folderPath = `./images/${formattedType}`;
             const fileName = `${formattedType}_${formattedName}`;

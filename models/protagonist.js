@@ -23,8 +23,10 @@ class Protagonist {
         return prompt;
     }
 
-    async generateImage(prompt) {
-        const imageUrl = await StableImage.generateImage(prompt, this.name, this.constructor.name);
+    generateImage(prompt) {
+        const imageName = Math.random().toString(36);
+        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
+        StableImage.generateImage(prompt, imageName, this.constructor.name);
         this.setImageUrl(imageUrl);
     }
 
@@ -66,6 +68,15 @@ class Protagonist {
         return data;
     }
 
+    static async findOneByUniverseAndUser(id, protagonistId, userId) {
+        const protagonist = await DbConnector.searchObject("protagonist", {id_universe: id, id: protagonistId, id_user: userId});
+        if (!protagonist) {
+            return protagonist;
+        }
+        const data = Protagonist.fromMap(protagonist[0]);
+        return data;
+    }
+
     static async findAll() {
         const protagonists = await DbConnector.loadObjects("protagonist");
         const data = [];
@@ -75,8 +86,8 @@ class Protagonist {
         return data;
     }
 
-    static async findAllByUniverseAndUser(id_universe, id_user) {
-        const protagonists = await DbConnector.loadObjectsByUniverseAndUser("protagonist", id_universe, id_user);
+    static async findAllByUniverseAndUser(universeId, userId) {
+        const protagonists = await DbConnector.searchObject("protagonist", {id_universe: universeId, id_user: userId});
         const data = [];
         protagonists.forEach(protagonist => {
             data.push(Protagonist.fromMap(protagonist));

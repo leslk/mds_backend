@@ -7,15 +7,15 @@ exports.createUniverse = async (req, res) => {
         let universe = new Universe(null, req.body.name, req.body.id_user);
         await universe.generateDescription(this.name);
         const prompt = await universe.generateStablePrompt(universe);
-        await universe.generateImage(prompt);
-        await universe.save();
-        return res.status(201).json({ message: 'Universe created' });
+        universe.generateImage(prompt);
+        const response = await universe.save();
+        return res.status(201).json(response);
     } catch(err) {
         return res.status(500).json({ error: err.message });
     }
 }
 
-exports.updateUniverse = (req, res) => {
+exports.updateUniverse = async (req, res) => {
     try {
         const universe = new Universe(req.params.id, req.body.name, req.body.user_id);
         if (!universe) {
@@ -24,8 +24,8 @@ exports.updateUniverse = (req, res) => {
         if (universe.id_user !== req.body.id_user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        universe.save();
-        return res.status(200).json({ message: 'Universe updated' });
+        const response = await universe.save();
+        return res.status(200).json(response);
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
@@ -41,7 +41,6 @@ exports.deleteUniverse = async (req, res) => {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         const protagonists = await Protagonist.findAllByUniverseAndUser(req.params.id, req.body.id_user);
-        console.log(protagonists);
         for (let protagonist of protagonists) {
             await Protagonist.delete(protagonist.id);
         }

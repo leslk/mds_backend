@@ -24,7 +24,7 @@ class OpenAi{
         try {
             const response = await openAi.completions.create({
                 model: process.env.OPENAI_MODEL,
-                prompt: `Generate a pers ${protagonist} in ${universe} universe with 500 character maximum?\n`,
+                prompt: `Generate a pers ${protagonist.name} in ${universe.name} universe with 500 character maximum?\n`,
                 temperature: 1,
                 max_tokens: 256,
                 top_p: 1,
@@ -39,7 +39,7 @@ class OpenAi{
 
     static async generateStableProtagonistPrompt(character, universe) {
 
-        let prompt = `Generate a prompt for the protagonist $[charater.name] from the universe ${universe} to generate an image using a Text to Image AI. Here is the description of the character:\n ${character.description} \n\nThe prompt will be used to generate an image on stable diffusion and must not exceed 500 characters.`;
+        let prompt = `Generate a prompt for the protagonist ${character.name} from the universe ${universe.name} to generate an image using a Text to Image AI. Here is the description of the character:\n ${character.description} \n\nThe prompt will be used to generate an image on stable diffusion and must not exceed 500 characters.`;
         try {
             const response = await openAi.completions.create({
                 model: process.env.OPENAI_MODEL,
@@ -70,6 +70,23 @@ class OpenAi{
                 presence_penalty: 0,
             });
             return response.choices[0].text;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static async generateMessage(messages) {
+        try {
+            const response = await openAi.chat.completions.create({
+                model: "gpt-4",//process.env.OPENAI_MODEL,
+                messages: messages,
+                temperature: 1,
+                max_tokens: 256,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0,
+            });
+            return response.choices[0].message.content;
         } catch (err) {
             throw err;
         }

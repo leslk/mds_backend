@@ -1,7 +1,5 @@
 const express = require('express');
 require("dotenv").config({path : "./config/.env"});
-const sql = require("mysql2/promise");
-
 
 const protagonistRoutes = require("./routes/protagonist");
 const universeRoutes = require("./routes/universe");
@@ -12,16 +10,6 @@ const talkRoutes = require("./routes/talk");
 
 const app = express();
 app.use(express.json());
-
-// const helloWord = (req, res) => {
-//     let string = req.body.message.split('').reverse().join('')
-//     console.log(req.body.message);
-//     res.json({headers: req.headers, type: req.method, url: req.url, message: string});
-// }
-
-// app.use((req, res) => {
-//     helloWord(req, res);
-// });
 
 app.use("/api/universes", universeRoutes);
 app.use("/api/universes", protagonistRoutes);
