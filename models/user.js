@@ -37,7 +37,8 @@ class User {
 
     static async findOneByEmail(email) {
         const user = await DbConnector.searchObject("user", {email: email});
-        const data = User.fromMap(user);
+        console.log(user);
+        const data = User.fromMap(user[0]);
         return data;
     }
 

@@ -7,7 +7,7 @@ class OpenAi{
         try {
             const response = await openAi.completions.create({
                 model: process.env.OPENAI_MODEL,
-                prompt: `Can you give me a concise and precise description of ${universe} universe with 500 character maximum?\n`,
+                prompt: `Can you give me a concise and precise description of ${universe.name} universe with 500 character maximum?\n`,
                 temperature: 1,
                 max_tokens: 256,
                 top_p: 1,

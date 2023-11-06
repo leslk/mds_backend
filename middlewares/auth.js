@@ -13,10 +13,17 @@ module.exports = async (req, res, next) => {
         const user = await User.findOne(id);
 
         if ((user && user.id != id) || (req.body.userId && user.id != req.body.userId)) {
-            throw "Invalid user ID";
+            throw {
+                "error" : "AUTH_TOKEN_ERROR",
+                "message": "Received token is invalid",
+                "details" : "Sent token must match an existing user"
+            };
         }
         next();
     } catch (error) {
-        res.status(401).json("Received token is invalid");
+        res.status(401).json({
+            "error" : "AUTH_TOKEN_ERROR",
+            "message": "Received token is invalid"
+        });
     }
 }

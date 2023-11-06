@@ -39,8 +39,8 @@ class Universe {
     }
 
     setDescription(description) {
-        description.replace("\n", "");
-        this.description = description;
+        const descriptionWithoutQuotesAndNewlines = description.replace(/["\n]/g, '');
+        this.description = descriptionWithoutQuotesAndNewlines;
     }
 
     setImageUrl(imageUrl) {

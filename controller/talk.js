@@ -14,9 +14,23 @@ exports.getTalks = async (req, res) => {
 
 exports.createTalk = async (req, res) => {
     try {
+        const protagonist = await DbConnector.searchObject("protagonist", {id: req.body.id_protagonist});
+        const universe = await DbConnector.searchObject("universe", {id: protagonist[0].id_universe});
+        if (!universe) {
+            return res.status(404).json({
+                error : "UNIVERSE_NOT_FOUND",
+                message : "Universe protagonist not found",    
+           });
+        }
+        if (universe[0].id_user !== req.body.id_user) {
+            return res.status(401).json({
+                error : "CREATE_DATA_ERROR",
+                message : "Unauthorized request",
+            });
+        }
         const newtalk = new Talk(null, req.body.id_user, req.body.id_protagonist);
         const talk = await newtalk.save();
-        return res.status(201).json({talk: talk, message: message});
+        return res.status(201).json({talk: talk, message: req.body.message});
     } catch(err) {
         return res.status(500).json({ error: err.message });
     }
@@ -26,10 +40,16 @@ exports.deleteTalk = async (req, res) => {
     try {
         const talk = await DbConnector.searchObject("talk", {id: req.params.id});
         if (!talk) {
-            return res.status(404).json({ error: 'talk not found' });
+            return res.status(404).json({
+                error : "TALK_NOT_FOUND",
+                message : "Talk not found",
+            });
         }
         if (req.body.id_user != talk.id_user) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({
+                error : "DELETE_DATA_ERROR",
+                message : "Unauthorized request",
+            });
         }
         const messages = await Message.findAll(req.params.id);
         for (let message of messages) {
@@ -38,7 +58,11 @@ exports.deleteTalk = async (req, res) => {
         await Talk.delete(req.params.id);
         return res.status(200).json({ message: 'Talk deleted' });
     } catch(err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({
+            error: "SERVER_ERROR",
+            message: err
+        
+        });
     }
 }
 
@@ -46,10 +70,16 @@ exports.getTalk = async (req, res) => {
    try {
         const talk = await Talk.findOne(req.params.id, req.body.id_protagonist, req.body.id_user);
         if (talk === null) {
-            return res.status(404).json({ error: 'Talk not found' });
+            return res.status(404).json({
+                error : "TALK_NOT_FOUND",
+                message : "Talk not found",
+            });
         }
         return res.status(200).json(talk);
     } catch (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({
+            error: "SERVER_ERROR",
+            message: err
+        });
     }
 }

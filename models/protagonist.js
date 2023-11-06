@@ -31,7 +31,8 @@ class Protagonist {
     }
 
     setDescription(description) {
-        this.description = description.replace("\n", "");
+        const descriptionWithoutQuotesAndNewlines = description.replace(/["\n]/g, '');
+        this.description = descriptionWithoutQuotesAndNewlines;
     }
 
     setImageUrl(imageUrl) {
@@ -87,7 +88,9 @@ class Protagonist {
     }
 
     static async findAllByUniverseAndUser(universeId, userId) {
+        console.log(universeId, userId)
         const protagonists = await DbConnector.searchObject("protagonist", {id_universe: universeId, id_user: userId});
+        console.log(protagonists)
         const data = [];
         protagonists.forEach(protagonist => {
             data.push(Protagonist.fromMap(protagonist));
