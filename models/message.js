@@ -1,4 +1,4 @@
-const DbConnector = require('../config/dbConnector');
+const ProxyDb = require('../config/ProxyDb');
 const OpenAi = require('./openAi');
 
 class Message {
@@ -27,11 +27,11 @@ class Message {
     }
 
     async save() {
-        return await DbConnector.saveObject(this);
+        return await ProxyDb.saveObject(this);
     }
 
     static async findAll(id) {
-        const messages = await DbConnector.searchObject("message", {id_talk: id});
+        const messages = await ProxyDb.searchObject("message", {id_talk: id});
         const data = [];
         messages.forEach(message => {
             data.push(Message.fromMap(message));
@@ -45,7 +45,7 @@ class Message {
     }
 
     static async delete(id) {
-        return await DbConnector.deleteObject("message", id);
+        return await ProxyDb.deleteObject("message", id);
     }
 }
 

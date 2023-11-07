@@ -1,4 +1,4 @@
-const DbConnector = require("../config/dbConnector");
+const ProxyDb = require("../config/ProxyDb");
 
 class User {
     constructor(id, pseudo, email, password) {
@@ -9,7 +9,7 @@ class User {
     }
 
     async save() {
-        return await DbConnector.saveObject(this);
+        return await ProxyDb.saveObject(this);
     }
 
     toMap() {
@@ -27,7 +27,7 @@ class User {
     }
 
     static async findOne(id) {
-        const user = await DbConnector.loadObject("user", id);
+        const user = await ProxyDb.loadObject("user", id);
         if (!user) {
             return user;
         }
@@ -36,14 +36,16 @@ class User {
     }
 
     static async findOneByEmail(email) {
-        const user = await DbConnector.searchObject("user", {email: email});
-        console.log(user);
+        const user = await ProxyDb.searchObject("user", {email: email});
+        if (user.length === 0) {
+            return user;
+        }
         const data = User.fromMap(user[0]);
         return data;
     }
 
     static async findAll() {
-        const users = await DbConnector.loadObjects("user");
+        const users = await ProxyDb.loadObjects("user");
         const data = [];
         users.forEach(user => {
             data.push(User.fromMap(user));

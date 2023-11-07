@@ -21,7 +21,6 @@ exports.createUser = async (req, res) => {
                 details : "Email is incorrect"       
            });
         }
-
         if (req.body.password.length < 8) {
             return res.status(400).json({
                 error : "WEAK_PASSWORD",

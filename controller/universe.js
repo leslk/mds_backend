@@ -1,15 +1,16 @@
 const Universe = require('../models/universe');
 const Protagonist = require('../models/protagonist');
-const User = require('../models/user');
 
 exports.createUniverse = async (req, res) => {
     try {
         let universe = new Universe(null, req.body.name, req.body.id_user);
-        await universe.generateDescription(this.name);
-        const prompt = await universe.generateStablePrompt(universe);
-        universe.generateImage(prompt);
-        console.log(universe);
+        const imageName = Math.random().toString(36);
+        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
+        universe.setImageUrl(imageUrl);
+        await universe.generateDescription();
+        const prompt = await universe.generateStablePrompt();
         const response = await universe.save();
+        universe.generateImage(prompt, response.id);
         return res.status(201).json(response);
     } catch(err) {
         return res.status(500).json({

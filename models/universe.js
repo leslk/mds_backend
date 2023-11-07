@@ -1,4 +1,4 @@
-const DbConnector = require("../config/dbConnector");
+const ProxyDb = require("../config/ProxyDb");
 const OpenAi = require("../models/openAi");
 const StableImage = require("../models/stableImage");
 const Protagonist = require("../models/protagonist");
@@ -14,7 +14,7 @@ class Universe {
     }
 
     async getAllProtagonists() {
-        const protagonists = await DbConnector.searchObject("protagonists", {"id_univers": this.id});
+        const protagonists = await ProxyDb.searchObject("protagonists", {"id_univers": this.id});
         const data = [];
         protagonists.forEach(protagonist => {
             data.push(Protagonist.fromMap(protagonist));
@@ -23,19 +23,17 @@ class Universe {
     }
 
     async generateDescription() {
-        const description = await OpenAi.generateUniverseDescription(this.name);
+        const description = await OpenAi.generateUniverseDescription(this);
         this.setDescription(description)
     }
 
     async generateStablePrompt() {
-        await OpenAi.generateStableUniversePrompt(this.name);
+        await OpenAi.generateStableUniversePrompt(this);
     }
 
-    generateImage(prompt) {
+    generateImage(prompt, universeId) {
         const imageName = Math.random().toString(36);
-        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
-        StableImage.generateImage(prompt, imageName, this.constructor.name);
-        this.setImageUrl(imageUrl);
+        StableImage.generateImage(prompt, universeId, Universe, imageName, this.constructor.name);
     }
 
     setDescription(description) {
@@ -63,11 +61,11 @@ class Universe {
     }
 
     async save() {
-        return  await DbConnector.saveObject(this);
+        return  await ProxyDb.saveObject(this);
     }
 
     static async findOne(id) {
-        const universe = await DbConnector.loadObject("universe", id);
+        const universe = await ProxyDb.loadObject("universe", id);
         if (!universe) {
             return universe;
         }
@@ -76,7 +74,7 @@ class Universe {
     }
 
     static async findAll(id_user) {
-        const universes = await DbConnector.searchObject("universe", {id_user: id_user});
+        const universes = await ProxyDb.searchObject("universe", {id_user: id_user});
         const data = [];
         universes.forEach(universe => {
             data.push(Universe.fromMap(universe));
@@ -85,7 +83,7 @@ class Universe {
     }
 
     static async delete(id) {
-        return await DbConnector.deleteObject("universe", id);
+        return await ProxyDb.deleteObject("universe", id);
     }
 }
 

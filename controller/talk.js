@@ -1,6 +1,6 @@
 const Talk = require('../models/talk');
 const Message = require('../models/message');
-const DbConnector = require('../config/dbConnector.js');
+const ProxyDb = require('../config/ProxyDb.js');
 
 
 exports.getTalks = async (req, res) => {
@@ -14,8 +14,8 @@ exports.getTalks = async (req, res) => {
 
 exports.createTalk = async (req, res) => {
     try {
-        const protagonist = await DbConnector.searchObject("protagonist", {id: req.body.id_protagonist});
-        const universe = await DbConnector.searchObject("universe", {id: protagonist[0].id_universe});
+        const protagonist = await ProxyDb.searchObject("protagonist", {id: req.body.id_protagonist});
+        const universe = await ProxyDb.searchObject("universe", {id: protagonist[0].id_universe});
         if (!universe) {
             return res.status(404).json({
                 error : "UNIVERSE_NOT_FOUND",
@@ -38,7 +38,7 @@ exports.createTalk = async (req, res) => {
 
 exports.deleteTalk = async (req, res) => {
     try {
-        const talk = await DbConnector.searchObject("talk", {id: req.params.id});
+        const talk = await ProxyDb.searchObject("talk", {id: req.params.id});
         if (!talk) {
             return res.status(404).json({
                 error : "TALK_NOT_FOUND",

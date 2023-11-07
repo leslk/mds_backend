@@ -1,4 +1,4 @@
-const DbConnector = require('../config/dbConnector');
+const ProxyDb = require('../config/ProxyDb');
 const Protagonist = require('./protagonist');
 const Universe = require('./universe');
 
@@ -24,15 +24,15 @@ class Talk {
     }
     
     async save() {
-        return await DbConnector.saveObject(this);
+        return await ProxyDb.saveObject(this);
     }
 
     static async findOne(id, protagonistId, userId) {
-        const talkData = await DbConnector.searchObject("talk", {id: id});
+        const talkData = await ProxyDb.searchObject("talk", {id: id});
         const talk = Talk.fromMap(talkData[0]);
-        const characterData = await DbConnector.searchObject("protagonist", {id: protagonistId, id_user: userId});
+        const characterData = await ProxyDb.searchObject("protagonist", {id: protagonistId, id_user: userId});
         const protagonist = characterData[0];
-        const universeData = await DbConnector.searchObject("universe", {id: protagonist.id_universe, id_user: userId});
+        const universeData = await ProxyDb.searchObject("universe", {id: protagonist.id_universe, id_user: userId});
         const universe = Universe.fromMap(universeData[0]);
         const data = {
             talk: talk,
@@ -43,7 +43,7 @@ class Talk {
     }
 
     static async findAll(userId) {
-        const talkData = await DbConnector.searchObject("talk", {id_user: userId});
+        const talkData = await ProxyDb.searchObject("talk", {id_user: userId});
         const response = await this.findUniverseId(talkData);
         return response;
     }
@@ -51,8 +51,8 @@ class Talk {
     static async findUniverseId(talkData) {
         const data = [];
         await Promise.all(talkData.map( async (talk) => {
-            const protagonistData = await DbConnector.searchObject("protagonist", {id: talk.id_protagonist});
-            const universe = await DbConnector.searchObject("universe", {id: protagonistData[0].id_universe});
+            const protagonistData = await ProxyDb.searchObject("protagonist", {id: talk.id_protagonist});
+            const universe = await ProxyDb.searchObject("universe", {id: protagonistData[0].id_universe});
             talk["id_universe"] = universe[0].id;
             data.push(talk);
         })); 
@@ -60,7 +60,7 @@ class Talk {
     }
 
     static async delete(id) {
-        return await DbConnector.deleteObject("talk", id);
+        return await ProxyDb.deleteObject("talk", id);
     }
 }
 

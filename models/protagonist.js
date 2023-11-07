@@ -1,4 +1,4 @@
-const DbConnector = require("../config/dbConnector");
+const ProxyDb = require("../config/ProxyDb");
 const OpenAi = require("./openAi");
 const StableImage = require("./stableImage");
 
@@ -23,11 +23,9 @@ class Protagonist {
         return prompt;
     }
 
-    generateImage(prompt) {
+    generateImage(prompt, protagonistId) {
         const imageName = Math.random().toString(36);
-        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
-        StableImage.generateImage(prompt, imageName, this.constructor.name);
-        this.setImageUrl(imageUrl);
+        StableImage.generateImage(prompt, protagonistId, Protagonist, imageName, this.constructor.name);
     }
 
     setDescription(description) {
@@ -57,11 +55,11 @@ class Protagonist {
     }
 
     async save() {
-        return await DbConnector.saveObject(this);
+        return await ProxyDb.saveObject(this);
     }
 
     static async findOne(id) {
-        const protagonist = await DbConnector.loadObject("protagonist", id);
+        const protagonist = await ProxyDb.loadObject("protagonist", id);
         if (!protagonist) {
             return protagonist;
         }
@@ -70,7 +68,7 @@ class Protagonist {
     }
 
     static async findOneByUniverseAndUser(id, protagonistId, userId) {
-        const protagonist = await DbConnector.searchObject("protagonist", {id_universe: id, id: protagonistId, id_user: userId});
+        const protagonist = await ProxyDb.searchObject("protagonist", {id_universe: id, id: protagonistId, id_user: userId});
         if (!protagonist) {
             return protagonist;
         }
@@ -79,7 +77,7 @@ class Protagonist {
     }
 
     static async findAll() {
-        const protagonists = await DbConnector.loadObjects("protagonist");
+        const protagonists = await ProxyDb.loadObjects("protagonist");
         const data = [];
         protagonists.forEach(protagonist => {
             data.push(Protagonist.fromMap(protagonist));
@@ -88,9 +86,7 @@ class Protagonist {
     }
 
     static async findAllByUniverseAndUser(universeId, userId) {
-        console.log(universeId, userId)
-        const protagonists = await DbConnector.searchObject("protagonist", {id_universe: universeId, id_user: userId});
-        console.log(protagonists)
+        const protagonists = await ProxyDb.searchObject("protagonist", {id_universe: universeId, id_user: userId});
         const data = [];
         protagonists.forEach(protagonist => {
             data.push(Protagonist.fromMap(protagonist));
@@ -99,7 +95,7 @@ class Protagonist {
     }
 
     static async delete(id) {
-        return DbConnector.deleteObject("protagonist", id);
+        return ProxyDb.deleteObject("protagonist", id);
     }
 }
 

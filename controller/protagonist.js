@@ -1,5 +1,6 @@
 const Universe = require('../models/universe.js');
 const Protagonist = require('../models/protagonist.js');
+const { image } = require('../models/stableImage.js');
 
 exports.getProtagonists = async (req, res) => {
     try {
@@ -20,6 +21,9 @@ exports.getProtagonists = async (req, res) => {
 exports.createProtagonist = async (req, res) => {
     try {
         const protagonist = new Protagonist(null, req.body.name, null, null, req.params.id, req.body.id_user);
+        const imageName = Math.random().toString(36);
+        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
+        protagonist.setImageUrl(imageUrl);
         const universe = await Universe.findOne(req.params.id);
         if (!universe) {
             return res.status(404).json({
@@ -27,7 +31,7 @@ exports.createProtagonist = async (req, res) => {
                 message : "Universe protagonist not found",    
            });
         }
-        if (universe.id_user !== req.body.id_user) {
+        if (universe.id_user != req.body.id_user) {
             return res.status(401).json({
                 error : "CREATE_DATA_ERROR",
                 message : "Unauthorized request",
@@ -35,11 +39,11 @@ exports.createProtagonist = async (req, res) => {
         }
         await protagonist.generateDescription(protagonist, universe);
         const prompt = await protagonist.generateStablePrompt(protagonist);
-        protagonist.generateImage(prompt);
         const response = await protagonist.save();
+        protagonist.generateImage(prompt, response.id);
         return res.status(201).json(response);
     } catch(err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err });
     }
 }
 
@@ -52,7 +56,7 @@ exports.updateProtagonist = async (req, res) => {
                 message : "protagonist not found",    
            });
         }
-        if (protagonist.id_user !== req.body.id_user) {
+        if (protagonist.id_user != req.body.id_user) {
             return res.status(401).json({
                 error : "UPDATE_DATA_ERROR",
                 message : "Unauthorized request",

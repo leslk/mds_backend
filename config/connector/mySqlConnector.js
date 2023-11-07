@@ -1,6 +1,9 @@
-class DbConnector {
+const DbConnector = require('./dbConnector');
+
+class MySqlConnector extends DbConnector{
     constructor() {
-        this.connection = require('../config/database').databaseConnection;
+        super();
+        this.connection = require('../database/mySqlDatabase').databaseConnection;
     }
 
     async searchObject(className, filter){
@@ -34,7 +37,7 @@ class DbConnector {
         try {
             map.id = (await this.connection.promise().query(sql))[0].insertId;
         } catch(err) {
-            throw new Error(`Error on inserting object ${object.constructor.name} into DB: ${err.message}`);
+            throw `Error on inserting object ${object.constructor.name} into DB: ${err.message}`;
         }
         return map;
 
@@ -51,12 +54,16 @@ class DbConnector {
         const values = Object.values(map);
         const updateString = keys.map((key, index) => `${key} = '${values[index]}'`).join(', ');
         const sql = `UPDATE ${object.constructor.name} SET ${updateString} WHERE id = ${object.id}`
-        const obj = await this.connection.promise().query(sql).catch(err => {throw err;});
+        await this.connection.promise().query(sql).catch(err => {throw err;});
         const updatedObject = await this.loadObject(object.constructor.name, object.id);
         return updatedObject;
     }
 
     async deleteObject(className, id) {
+        const obj = await this.loadObject(className, id);
+        if (!obj) {
+            throw `Object ${className} with id ${id} not found`;
+        }
         const sql = `DELETE FROM ${className} WHERE id = ${id}`;
         return await this.connection.promise().query(sql).catch(err => {throw err;});
     }
@@ -77,4 +84,4 @@ class DbConnector {
     }
 }
 
-module.exports = new DbConnector();
+module.exports = MySqlConnector;
