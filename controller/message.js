@@ -1,107 +1,88 @@
-const ProxyDb = require('../config/ProxyDb.js');
 const Message = require('../models/message.js');
+const Protagonist = require('../models/protagonist.js');
+const Universe = require('../models/universe.js');
+const Talk = require('../models/talk.js');
 const moment = require('moment');
+const ErrorHandler = require('../models/errorHandler.js');
 
 exports.createMessage = async (req, res) => {
-    const date = new Date();
-    const formattedDate = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    const formattedDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
     try {
-        const talk = await ProxyDb.searchObject("talk", {id: req.params.id});
+        const talk = await Talk.findOne(req.params.id);
         if (!talk) {
-            return res.status(404).json({
-                error : "TALK_NOT_FOUND",
-                message : "Message talk not found",
-            });
+            const errorHandler = new ErrorHandler(404, "TALK_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
         if (req.body.id_user != talk.id_user) {
-            return res.status(401).json({
-                error : "CREATE_DATA_ERROR",
-                message : "Unauthorized request",
-            
-            });
+            const errorHandler = new ErrorHandler(401, "CREATE_DATA_ERROR");
+            return errorHandler.handleErrorResponse(res);
         }
-        const protagonist = await ProxyDb.searchObject("protagonist", {id: talk[0].id_protagonist});
-        const universe = await ProxyDb.searchObject("universe", {id: protagonist[0].id_universe});
+        const protagonist = await Protagonist.findOne(talk.id_protagonist);
+        const universe = await Universe.findOne(protagonist.id_universe);
         const userMessage = new Message(null, formattedDate, req.body.text, "user", req.params.id);
         await userMessage.save();
-        const messageList = await ProxyDb.searchObject("message", {id_talk: req.params.id});
+        const messageList = await Message.findAll(req.params.id);
         const messageListToSend = [];
         for (let index = 0; index < messageList.length; index++) {
             let prefix = "";
             if(index === 0) {
-                prefix = `Dans le cadre d'un jeu de rôle, l'IA devient le personnage de ${protagonist[0].name} issu de l'univers de ${universe[0].name} et répond à l'humain.\n\nVoici la description de ${universe[0].name}:${universe[0].description}\n.\n---\n`;
+                prefix = `Dans le cadre d'un jeu de rôle, l'IA devient le personnage de ${protagonist.name} issu de l'univers de ${universe.name} et répond à l'humain.\n\nVoici la description de ${universe.name}:${universe.description}\n.\n---\n`;
             }
             messageListToSend.push({role: messageList[index].role, content: prefix + messageList[index].text});
         }
         const messageText = await Message.generateMessage(messageListToSend);
-        const newMessage = new Message(null, moment(new Date()).format('YYYY-MM-DD HH:mm:ss'), messageText, "assistant", req.params.id);
+        const newMessage = new Message(null, formattedDate, messageText, "assistant", req.params.id);
         await newMessage.save();
         return res.status(201).json(newMessage);
     } catch(err) {
-        return res.status(500).json({
-            error: "SERVER_ERROR",
-            message: err
-        }); 
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }
 
 exports.getMessages = async (req, res) => {
     try {
-        ProxyDb.searchObject("talk", {id: req.params.id});
+        const talk = Talk.findOne(req.params.id);
         if (!talk) {
-            return res.status(404).json({
-                error : "TALK_NOT_FOUND",
-                message : "Message talk not found",
-            
-            });
+            const errorHandler = new ErrorHandler(404, "TALK_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
         if (req.body.id_user != talk.id_user) {
-            return res.status(401).json({
-                error : "GET_DATA_ERROR",
-                message : "Unauthorized request",
-            });
+            const errorHandler = new ErrorHandler(401, "GET_DATA_ERROR");
+            return errorHandler.handleErrorResponse(res);
         }
         const messages = await Message.findAll(req.params.id);
         return res.status(200).json(messages);
     } catch (err) {
-        return res.status(500).json({
-            error: "SERVER_ERROR",
-            message: err
-        });
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }
 
 exports.updateMessage = async (req, res) => {
-    const date = new Date();
-    const formattedDate = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    const formattedDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
     try {
-        const talk = ProxyDb.searchObject("talk", {id: req.params.id});
+        const talk = Talk.findOne(req.params.id);
         if (!talk) {
-            return res.status(404).json({
-                error : "TALK_NOT_FOUND",
-                message : "Message talk not found",
-            });
+            const errorHandler = new ErrorHandler(404, "TALK_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
         if (req.body.id_user != talk.id_user) {
-            return res.status(401).json({
-                error : "UPDATE_DATA_ERROR",
-                message : "Unauthorized request",
-            });
+            const errorHandler = new ErrorHandler(401, "UPDATE_DATA_ERROR");
+            return errorHandler.handleErrorResponse(res);
         }
         await Message.delete(req.params.messageId);
-        const messageList = await ProxyDb.searchObject("message", {id_talk: req.params.id});
+        const messageList = await Message.findAll(req.params.id);
         const messageListToSend = [];
         messageList.forEach(message => {
             messageListToSend.push({role: message.role, content: message.text});
         });
         const newMessage = await Message.generateMessage(messageListToSend);
-        const message = new Message(null, moment(new Date()).format('YYYY-MM-DD HH:mm:ss'), newMessage, "assistant", req.params.id);
+        const message = new Message(null, formattedDate, newMessage, "assistant", req.params.id);
         message.save();
         return res.status(201).json(newMessage);
     } catch(err) {
-        return res.status(500).json({
-            error: "SERVER_ERROR",
-            message: err
-        });
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }

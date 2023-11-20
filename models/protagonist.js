@@ -23,9 +23,8 @@ class Protagonist {
         return prompt;
     }
 
-    generateImage(prompt, protagonistId) {
-        const imageName = Math.random().toString(36);
-        StableImage.generateImage(prompt, protagonistId, Protagonist, imageName, this.constructor.name);
+    generateImage(prompt, protagonistId, imageUrl) {
+        StableImage.generateImage(prompt, protagonistId, Protagonist, imageUrl, this.constructor.name);
     }
 
     setDescription(description) {
@@ -33,8 +32,11 @@ class Protagonist {
         this.description = descriptionWithoutQuotesAndNewlines;
     }
 
-    setImageUrl(imageUrl) {
+    setImageUrl() {
+        const imageName = Math.random().toString(36);
+        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
         this.imageUrl = imageUrl;
+        return this.imageUrl;
     }
 
     toMap() {

@@ -1,6 +1,7 @@
 
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const ErrorHandler = require("../models/errorHandler");
 
 
 module.exports = async (req, res, next) => {
@@ -14,16 +15,13 @@ module.exports = async (req, res, next) => {
 
         if ((user && user.id != id) || (req.body.userId && user.id != req.body.userId)) {
             throw {
-                "error" : "AUTH_TOKEN_ERROR",
-                "message": "Received token is invalid",
-                "details" : "Sent token must match an existing user"
+                status: 401,
+                message: "Received token is invalid"
             };
         }
         next();
     } catch (error) {
-        res.status(401).json({
-            "error" : "AUTH_TOKEN_ERROR",
-            "message": "Received token is invalid"
-        });
+        const errorHandler = new ErrorHandler(error.status, error.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }

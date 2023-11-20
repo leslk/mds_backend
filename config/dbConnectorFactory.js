@@ -8,10 +8,10 @@ class DbConnectorFactory {
 
         switch (process.env.DB_TYPE) {
             case 'mysql':
-                dbConnector = new MysqlConnector();
+                dbConnector = MysqlConnector.getInstance();
                 break;
             case 'mongodb':
-                dbConnector = new MongoDbConnector();
+                dbConnector = MongoDbConnector.getInstance();
                 break;
             default:
                 throw new Error('DB_TYPE not defined');

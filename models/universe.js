@@ -31,9 +31,8 @@ class Universe {
         await OpenAi.generateStableUniversePrompt(this);
     }
 
-    generateImage(prompt, universeId) {
-        const imageName = Math.random().toString(36);
-        StableImage.generateImage(prompt, universeId, Universe, imageName, this.constructor.name);
+    generateImage(prompt, universeId, imageUrl) {
+        StableImage.generateImage(prompt, universeId, Universe, imageUrl, this.constructor.name);
     }
 
     setDescription(description) {
@@ -41,8 +40,11 @@ class Universe {
         this.description = descriptionWithoutQuotesAndNewlines;
     }
 
-    setImageUrl(imageUrl) {
+    setImageUrl() {
+        const imageName = Math.random().toString(36);
+        const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
         this.imageUrl = imageUrl;
+        return this.imageUrl;
     }
 
     toMap() {

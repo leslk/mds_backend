@@ -1,11 +1,19 @@
 const DbConnector = require("./dbConnector");
 
 class MongoDbConnector extends DbConnector {
+    static instance = null;
     constructor() {
         super();
         this.connection = require('../database/mongoDbDatabase').databaseConnection;
     }
 
+    static getInstance() {
+        if (this.instance === null) {
+            this.instance = new MongoDbConnector();
+        }
+        return this.instance;
+    }
+    
     async searchObject(documentName, filter) {
         const obj = await documentName.findOne(filter);
         return obj;

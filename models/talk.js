@@ -27,7 +27,7 @@ class Talk {
         return await ProxyDb.saveObject(this);
     }
 
-    static async findOne(id, protagonistId, userId) {
+    static async findOneWithUniverse(id, protagonistId, userId) {
         const talkData = await ProxyDb.searchObject("talk", {id: id});
         const talk = Talk.fromMap(talkData[0]);
         const characterData = await ProxyDb.searchObject("protagonist", {id: protagonistId, id_user: userId});
@@ -40,6 +40,12 @@ class Talk {
             universe: universe
         }
         return data;
+    }
+
+    static async findOne(id) {
+        const talkData = await ProxyDb.searchObject("talk", {id: id});
+        const talk = Talk.fromMap(talkData[0]);
+        return talk;
     }
 
     static async findAll(userId) {

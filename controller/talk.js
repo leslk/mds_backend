@@ -1,7 +1,8 @@
 const Talk = require('../models/talk');
 const Message = require('../models/message');
-const ProxyDb = require('../config/ProxyDb.js');
-
+const Protagonist = require('../models/protagonist');
+const Universe = require('../models/universe');
+const ErrorHandler = require('../models/errorHandler');
 
 exports.getTalks = async (req, res) => {
     try {
@@ -14,42 +15,35 @@ exports.getTalks = async (req, res) => {
 
 exports.createTalk = async (req, res) => {
     try {
-        const protagonist = await ProxyDb.searchObject("protagonist", {id: req.body.id_protagonist});
-        const universe = await ProxyDb.searchObject("universe", {id: protagonist[0].id_universe});
+        const protagonist = await Protagonist.findOne(req.body.id_protagonist);
+        const universe = await Universe.findOne(protagonist.id_universe);
         if (!universe) {
-            return res.status(404).json({
-                error : "UNIVERSE_NOT_FOUND",
-                message : "Universe protagonist not found",    
-           });
+            const errorHandler = new ErrorHandler(404, "UNIVERSE_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
-        if (universe[0].id_user !== req.body.id_user) {
-            return res.status(401).json({
-                error : "CREATE_DATA_ERROR",
-                message : "Unauthorized request",
-            });
+        if (universe.id_user !== req.body.id_user) {
+            const errorHandler = new ErrorHandler(401, "CREATE_DATA_ERROR");
+            return errorHandler.handleErrorResponse(res);
         }
         const newtalk = new Talk(null, req.body.id_user, req.body.id_protagonist);
         const talk = await newtalk.save();
         return res.status(201).json({talk: talk, message: req.body.message});
     } catch(err) {
-        return res.status(500).json({ error: err.message });
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }
 
 exports.deleteTalk = async (req, res) => {
     try {
-        const talk = await ProxyDb.searchObject("talk", {id: req.params.id});
+        const talk = await Talk.findOne(req.params.id);
         if (!talk) {
-            return res.status(404).json({
-                error : "TALK_NOT_FOUND",
-                message : "Talk not found",
-            });
+            const errorHandler = new ErrorHandler(404, "TALK_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
         if (req.body.id_user != talk.id_user) {
-            return res.status(401).json({
-                error : "DELETE_DATA_ERROR",
-                message : "Unauthorized request",
-            });
+            const errorHandler = new ErrorHandler(401, "DELETE_DATA_ERROR");
+            return errorHandler.handleErrorResponse(res);
         }
         const messages = await Message.findAll(req.params.id);
         for (let message of messages) {
@@ -58,28 +52,21 @@ exports.deleteTalk = async (req, res) => {
         await Talk.delete(req.params.id);
         return res.status(200).json({ message: 'Talk deleted' });
     } catch(err) {
-        return res.status(500).json({
-            error: "SERVER_ERROR",
-            message: err
-        
-        });
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }
 
 exports.getTalk = async (req, res) => {
    try {
-        const talk = await Talk.findOne(req.params.id, req.body.id_protagonist, req.body.id_user);
+        const talk = await Talk.findOneWithUniverse(req.params.id, req.body.id_protagonist, req.body.id_user);
         if (talk === null) {
-            return res.status(404).json({
-                error : "TALK_NOT_FOUND",
-                message : "Talk not found",
-            });
+            const errorHandler = new ErrorHandler(404, "TALK_NOT_FOUND");
+            return errorHandler.handleErrorResponse(res);
         }
         return res.status(200).json(talk);
     } catch (err) {
-        return res.status(500).json({
-            error: "SERVER_ERROR",
-            message: err
-        });
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
 }
