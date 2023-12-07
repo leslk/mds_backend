@@ -5,7 +5,7 @@ class ErrorHandler {
     }
   
     handleErrorResponse(res) {
-      return res.status(this.status).json({
+      return res.status(this.status || 500).json({
         error: {
           status: this.status,
           message: this.message,

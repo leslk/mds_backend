@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const ErrorHandler = require('../models/errorHandler');
 
 exports.createToken = async (payload) => {
     try {
@@ -9,7 +10,7 @@ exports.createToken = async (payload) => {
         );
         return token;
     } catch (err) {
-        throw err;
+        throw new ErrorHandler(500, "TOKEN_CREATION_ERROR");
     }
 
 }

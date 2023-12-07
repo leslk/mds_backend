@@ -9,6 +9,10 @@ Node.js , Express, Sql
   -  Installer nodemon local ou global:
   -  local : npm install --save-dev nodemon
   -  global : npm install -g nodemon
+## Créer la database: 
+1. Lancer MAMP
+2. Créer la base de données à l'aide de l'export database.sql
+Attention: Le projet fonctionnera uniquement si la base de donnée est lancée via MAMP
 ## Pour installer le projet :
 1. Cloner le repository
 2. Effectuer la commande npm install dans le répertoire principal pour installer toutes les dépendances

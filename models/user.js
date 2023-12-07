@@ -38,7 +38,16 @@ class User {
     static async findOneByEmail(email) {
         const user = await ProxyDb.searchObject("user", {email: email});
         if (user.length === 0) {
-            return user;
+            return null;
+        }
+        const data = User.fromMap(user[0]);
+        return data;
+    }
+
+    static async findOneByPseudo(pseudo) {
+        const user = await ProxyDb.searchObject("user", {pseudo: pseudo});
+        if (user.length === 0) {
+            return null;
         }
         const data = User.fromMap(user[0]);
         return data;
