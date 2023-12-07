@@ -13,10 +13,10 @@ module.exports = async (req, res, next) => {
         const id = decodedToken.id;
         const user = await User.findOne(id);
 
-        if ((user && user.id != id) || (req.body.userId && user.id != req.body.userId)) {
+        if ((user && user.id != id) || (req.body.id_user && user.id != req.body.id_user)) {
             throw {
                 status: 401,
-                message: "Received token is invalid"
+                message: "TOKEN_ID_NOT_MATCHING_USER_ID"
             };
         }
         next();

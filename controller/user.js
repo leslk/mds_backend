@@ -56,7 +56,7 @@ exports.checkAuth = async (req, res) => {
         });
     } catch (err) {
         const errorHandler = new ErrorHandler(err.status, err.message);
-         return errorHandler.handleErrorResponse(res);
+        return errorHandler.handleErrorResponse(res);
     }
 
     

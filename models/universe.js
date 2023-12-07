@@ -75,6 +75,15 @@ class Universe {
         return data;
     }
 
+    static async findOneByName(name) {
+        const universe = await ProxyDb.searchObject("universe", {name: name});
+        if (universe.length === 0) {
+            return null;
+        }
+        const data = Universe.fromMap(universe[0]);
+        return data;
+    }
+
     static async findAll(id_user) {
         const universes = await ProxyDb.searchObject("universe", {id_user: id_user});
         const data = [];

@@ -9,7 +9,6 @@ class StoredImage {
         const imagesDir = "./images";
         const formattedType = type.toLowerCase();
         const folderPath = `${imagesDir}/${formattedType}`;
-        console.log(imageUrl);
         const url = new URL(imageUrl);
         const fileName = url.pathname.split('/').pop();
         try {
