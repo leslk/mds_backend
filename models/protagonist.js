@@ -1,6 +1,9 @@
 const ProxyDb = require("../config/ProxyDb");
 const OpenAi = require("./openAi");
 const StableImage = require("./stableImage");
+const StoredImage = require("./storedImage");
+const Talk = require("./talk");
+const {checkOwnership} = require("../utils/jwt");
 
 class Protagonist {
     constructor(id, name, description, imageUrl, id_universe, id_user) {
@@ -19,8 +22,7 @@ class Protagonist {
     }
 
     async generateStablePrompt(universe) {
-        const prompt = await OpenAi.generateStableProtagonistPrompt(this, universe);
-        return prompt;
+        return await OpenAi.generateStableProtagonistPrompt(this, universe);
     }
 
     generateImage(prompt, protagonistId, imageUrl) {
@@ -37,6 +39,10 @@ class Protagonist {
         const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
         this.imageUrl = imageUrl;
         return this.imageUrl;
+    }
+
+    async deleteImage() {
+        await StoredImage.deleteImage(this.imageUrl, this.constructor.name.toLocaleLowerCase());
     }
 
     toMap() {
@@ -69,6 +75,15 @@ class Protagonist {
         return data;
     }
 
+    static async findOneByName(name) {
+        const protagonist = await ProxyDb.searchObject("protagonist", {name: name});
+        if (protagonist.length === 0) {
+            return null;
+        }
+        const data = Protagonist.fromMap(protagonist[0]);
+        return data;
+    }
+
     static async findOneByUniverseAndUser(id, protagonistId, userId) {
         const protagonist = await ProxyDb.searchObject("protagonist", {id_universe: id, id: protagonistId, id_user: userId});
         if (!protagonist) {
@@ -96,8 +111,13 @@ class Protagonist {
         return data;
     }
 
-    static async delete(id) {
-        return ProxyDb.deleteObject("protagonist", id);
+    async delete() {
+        await StoredImage.deleteImage(this.imageUrl, this.constructor.name.toLocaleLowerCase());
+        const talk = await Talk.findOneByProtagonist(this.id);
+        if (talk) {
+            await Talk.delete(talk.id);
+        }
+        return ProxyDb.deleteObject("protagonist", this.id);
     }
 }
 

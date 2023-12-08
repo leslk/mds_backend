@@ -24,16 +24,22 @@ class OpenAi{
     }
 
     static async generateProtagonistDescription(protagonist, universe) {
+        const prompt = `
+        Here is the description of the univers ${universe.name}:
+        ${universe.description}
+        --
+        Provide me with a description of the character named ${protagonist.name} from this universe. Give me their backstory, personality, and distinctive features.`;
         try {
             const response = await openAi.completions.create({
                 model: process.env.OPENAI_MODEL,
-                prompt: `Provide me with a description of the character ${protagonist.name} from the universe ${universe.name}. Give me their backstory, personality, and distinctive features.`,
+                prompt: prompt,
                 temperature: 1,
                 max_tokens: 256,
                 top_p: 1,
                 frequency_penalty: 0,
                 presence_penalty: 0,
             });
+            console.log( universe);
             return response.choices[0].text;
         } catch (err) {
             throw {
@@ -46,7 +52,7 @@ class OpenAi{
     static async generateStableProtagonistPrompt(character, universe) {
 
         let prompt = `
-        Here is the description of the character YYY:
+        Here is the description of the character ${character.name}:
         ${character.description}
         --
         Write me a prompt to generate an image using the Text-to-Image artificial intelligence called StableDiffusion to depict the character ${character.name} from the universe ${universe.name}. The prompt should be in English and not exceed 300 characters.`;
@@ -75,7 +81,8 @@ class OpenAi{
             `This is the description of the universe ${universe.name}: 
             ${universe.description}
             ---
-            Create a prompt to generate an image using the Text-to-Image artificial intelligence called StableDiffusion, representing the universe ${universe.name}. The prompt should be in English and not exceed 300 characters.`;
+            Create a Text-to-Image prompt to generate an image representing this universe in a representative style of it. The prompt should be in English and not exceed 300 characters.`;
+            console.log(prompt);
         try {
             const response = await openAi.completions.create({
                 model: process.env.OPENAI_MODEL,
@@ -86,6 +93,7 @@ class OpenAi{
                 frequency_penalty: 0,
                 presence_penalty: 0,
             });
+            console.log(response.choices[0].text)
             return response.choices[0].text;
         } catch (err) {
             const errorHandler = new ErrorHandler(err.status, err.message);

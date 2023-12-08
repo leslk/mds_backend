@@ -2,7 +2,7 @@ const ProxyDb = require("../config/ProxyDb");
 const OpenAi = require("../models/openAi");
 const StableImage = require("../models/stableImage");
 const Protagonist = require("../models/protagonist");
-
+const StoredImage = require("../models/storedImage");
 
 class Universe {
     constructor(id, name, id_user, description, imageUrl) {
@@ -28,7 +28,7 @@ class Universe {
     }
 
     async generateStablePrompt() {
-        await OpenAi.generateStableUniversePrompt(this);
+        return await OpenAi.generateStableUniversePrompt(this);
     }
 
     generateImage(prompt, universeId, imageUrl) {
@@ -45,6 +45,10 @@ class Universe {
         const imageUrl = process.env.HOST + `/images/${this.constructor.name.toLocaleLowerCase()}/${this.constructor.name.toLocaleLowerCase()}_${imageName}.png`;
         this.imageUrl = imageUrl;
         return this.imageUrl;
+    }
+
+    async deleteImage() {
+       await StoredImage.deleteImage(this.imageUrl, this.constructor.name.toLocaleLowerCase());
     }
 
     toMap() {
@@ -93,8 +97,9 @@ class Universe {
         return data;
     }
 
-    static async delete(id) {
-        return await ProxyDb.deleteObject("universe", id);
+    async delete() {
+        this.deleteImage(this.imageUrl, this.constructor.name.toLocaleLowerCase());
+        return await ProxyDb.deleteObject("universe", this.id);
     }
 }
 

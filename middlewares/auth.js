@@ -7,6 +7,7 @@ const ErrorHandler = require("../models/errorHandler");
 module.exports = async (req, res, next) => {
 
     try {
+        if (!req.headers.authorization) throw { status: 401, message: "UNAUTHORIZED_REQUEST" };
         const token = req.headers.authorization.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET, { algorithm: 'HS256' });
   

@@ -41,7 +41,7 @@ class Message {
 
     static async generateMessage(messages) {
         const newMessage = await OpenAi.generateMessage(messages);
-        return newMessage;
+        return newMessage.replace(/["\n]/g, '');
     }
 
     static async delete(id) {

@@ -51,6 +51,24 @@ class StoredImage {
             throw err;
         }
     }
+
+    static async deleteImage(imageUrl, type) {
+        const formattedType = type.toLowerCase();
+        const url = new URL(imageUrl);
+        const fileName = url.pathname.split('/').pop();
+        const folderPath = `./images/${formattedType}`;
+        const filePath = `${folderPath}/${fileName}`;
+        try {
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                console.log(`File "${fileName}" has been deleted.`);
+            } else {
+                console.log(`File "${fileName}" not found.`);
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = StoredImage;

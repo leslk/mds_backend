@@ -23,15 +23,19 @@ exports.createUser = async (req, res) => {
 }
 
 exports.checkPseudoAvailability = async (req, res) => {
-    // Helps front to know if the given pseudo is available or not
-    const user = await User.findOneByPseudo(req.body.pseudo);
-
-    if (user) {
-        const errorHandler = new ErrorHandler(409, "PSEUDO_ALREADY_EXISTS");
-         return errorHandler.handleErrorResponse(res);
+    try {
+        // Helps front to know if the given pseudo is available or not
+        const user = await User.findOneByPseudo(req.body.pseudo);
+    
+        if (user) {
+            throw new ErrorHandler(409, "PSEUDO_ALREADY_EXISTS");
+        }
+    
+        return res.status(200).json({ message: 'Pseudo available' });
+    } catch (err) {
+        const errorHandler = new ErrorHandler(err.status, err.message);
+        return errorHandler.handleErrorResponse(res);
     }
-
-    return res.status(200).json({ message: 'Pseudo available' });
 }
 
 exports.checkAuth = async (req, res) => {
@@ -40,8 +44,7 @@ exports.checkAuth = async (req, res) => {
         await userUtils.checkPassword(req.body.email, req.body.password);
         const user = await User.findOneByEmail(req.body.email)
         if (!user) {
-            const errorHandler = new ErrorHandler(404, "WRONG_EMAIL");
-            return errorHandler.handleErrorResponse(res);
+            throw new ErrorHandler(404, "WRONG_EMAIL");
         }
 
         // Generate token and send user data to front
@@ -68,15 +71,13 @@ exports.updateUser= async (req, res) => {
         const token = req.headers.authorization.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET, { algorithm: 'HS256' });
         if (decodedToken.id != req.params.id) {
-            const errorHandler = new ErrorHandler(401, "UPDATE_USER_DATA_ERROR");
-            return errorHandler.handleErrorResponse(res);
+            throw new ErrorHandler(401, "UPDATE_USER_DATA_ERROR");
         }
 
         // Get user from db to check and update user data object
         let user = await User.findOne(req.params.id);
         if (!user) {
-            const errorHandler = new ErrorHandler(404, "USER_NOT_FOUND");
-            return errorHandler.handleErrorResponse(res);
+            throw new ErrorHandler(404, "USER_NOT_FOUND");
         }
 
         if (user.pseudo !== req.body.pseudo) {
@@ -91,8 +92,7 @@ exports.updateUser= async (req, res) => {
 
         if (req.body.newPassword) {
             if (!req.body.oldPassword) {
-                const errorHandler = new ErrorHandler(400, "OLD_PASSWORD_REQUIRED");
-                return errorHandler.handleErrorResponse(res);
+                throw new ErrorHandler(400, "OLD_PASSWORD_REQUIRED");
             }
             await userUtils.checkPassword(user.email, req.body.oldPassword);
             userUtils.validatePassword(req.body.newPassword);
@@ -113,8 +113,7 @@ exports.getUser = async (req, res) => {
     try {
         const user = await User.findOne(req.params.id);
         if (user === null) {
-            const errorHandler = new ErrorHandler(404, "USER_NOT_FOUND");
-            return errorHandler.handleErrorResponse(res);
+            throw new ErrorHandler(404, "USER_NOT_FOUND");
         }
 
         // Delete password from user object before sending it to front
