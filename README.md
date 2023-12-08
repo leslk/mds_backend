@@ -11,14 +11,14 @@ Node.js , Express, Sql
   -  global : npm install -g nodemon
 ## Créer la database: 
 1. Lancer MAMP
-2. Créer la base de données à l'aide de l'export database.sql
+2. Créer la base de données à l'aide de l'export database.sql dans le dossier setup du projet
 Attention: Le projet fonctionnera uniquement si la base de donnée est lancée via MAMP
 ## Pour installer le projet :
 1. Cloner le repository
 2. Effectuer la commande npm install dans le répertoire principal pour installer toutes les dépendances
 3. Renommer le fichier .env.example se trouvant dans le dossier config en fichier .env et renseigner :
-  - DATABASE_USER = userName MongoDb => ne rien renseigné le projet fonctionnera uniquement via mysql
-  - DATABASE_PASSWORD = MDP MongoDb => ne rien renseigné le projet fonctionnera uniquement via mysql
+  - DATABASE_USER = userName MongoDb => ne rien renseigner le projet fonctionnera uniquement via mysql
+  - DATABASE_PASSWORD = MDP MongoDb => ne rien renseigner le projet fonctionnera uniquement via mysql
   - DB_USER = userName mySQL
   - DB_TYPE = mysql
   - DB_PASSWORD = MDP mySQL
@@ -29,9 +29,9 @@ Attention: Le projet fonctionnera uniquement si la base de donnée est lancée v
   - OPENAI_API_KEY = votre clé API OPENAI
   - STABLE_API_KEY = votre clé STABLE DIFFUSION
   - HOST = http://localhost:3000
-  - OPENAI_MODEL = openAI model fourni
+  - OPENAI_MODEL = gpt-3.5-turbo-instruct
   - TOKEN_SECRET = token secret key fournie
 ## Lancer le projet :
 - Lancer le server via la commande 'node server' via la commande 'nodemon server' si vous avez installé nodemon
 ## Tester le projet :
-- Pour tester le projet vous pouvez utiliser postman ou insomnia
+- Pour tester le projet vous pouvez utiliser postman via l'export de la collection fournie dans le dossier setup du projet
